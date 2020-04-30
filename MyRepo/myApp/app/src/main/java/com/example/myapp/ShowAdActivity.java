@@ -30,8 +30,6 @@ public class ShowAdActivity extends AppCompatActivity {
 
         showAd = (TextView)findViewById(R.id.showAd);
 
-        showAd.setText("showAd");
-
         //初始化Mobile Ads SDK
         MobileAds.initialize(this, new OnInitializationCompleteListener() {
             @Override

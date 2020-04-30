@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView max;
     private TextView min;
     private TextView address;
+    private EditText et;
+    private Button button;
     private String addr;
     private Handler handler;    //消息处理器，收到请求后修改布局
     private JSONObject weatherInfo;
@@ -48,6 +52,22 @@ public class MainActivity extends AppCompatActivity {
         max = (TextView) findViewById(R.id.max);
         min = (TextView) findViewById(R.id.min);
         address = (TextView) findViewById(R.id.address);
+        et = (EditText)findViewById(R.id.editText);
+        button = (Button)findViewById(R.id.button);
+
+        /*Thread t2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                GetWeatherInfo gwi = new GetWeatherInfo(getApplicationContext());
+                //gwi.getCityInfo();
+                button.setText(gwi.getCityInfo());
+            }
+        });
+        t2.start();*/
+
+
+
+
         getAddress_();
         t.start();
 
@@ -77,7 +97,8 @@ public class MainActivity extends AppCompatActivity {
     //向天气api发送请求
     public String sendRequest() {
         try {
-            URL url = makeURL(parseAddr(getAddress()));
+            String strURL = "https://way.jd.com/he/freeweather?city=" + parseAddr(getAddress()) + "&appkey=d1f0e670fecaadeef96e3cdcfaeb9fb6";
+            URL url = new URL(strURL);
             //创建http连接并开启连接
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
@@ -98,17 +119,6 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return "false";
-    }
-
-    //生成获取天气的请求路径
-    public URL makeURL(String cityInfo) throws MalformedURLException {
-        URL url = null;
-        String s1 = "https://way.jd.com/he/freeweather?city=";
-        String s2 = "&appkey=";
-        String appkey = "d1f0e670fecaadeef96e3cdcfaeb9fb6";
-        String strURL = s1 + cityInfo + s2 + appkey;
-        url = new URL(strURL);
-        return url;
     }
 
     //向api发送请求获取地理信息并返回信息。
@@ -219,10 +229,5 @@ public class MainActivity extends AppCompatActivity {
         mLocationClient.setLocationListener(mLocationListener);
         //启动定位
         mLocationClient.startLocation();
-
-
-
     }
-
-
 }
