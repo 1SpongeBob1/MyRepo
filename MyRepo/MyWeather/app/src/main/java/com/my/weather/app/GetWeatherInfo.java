@@ -1,9 +1,6 @@
 package com.my.weather.app;
 
 import android.content.Context;
-import android.util.Log;
-import android.widget.Toast;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -25,12 +22,10 @@ import java.net.URLDecoder;
 public class GetWeatherInfo {
     private String city;
     private Context context;
-    //String[] str;
-    private Double longitude;
-    private Double latitude;
+    Double[] db;
 
-    public GetWeatherInfo(Context c){
-        context = c;
+    public GetWeatherInfo(Context context){
+        this.context = context;
     }
     public GetWeatherInfo(String cityInfo){
         city = cityInfo;
@@ -40,49 +35,47 @@ public class GetWeatherInfo {
         //判断是否传入city名
         if ( city != null ){
             return city;
+        }else{
+            getAddress_();
+            city = parseAddr(getAddress());
+            return city;
         }
-        getAddress_();
-        city = parseAddr(getAddress());
-        return city;
     }
 
     //高德地图获取地址信息
-    public void getAddress_(){
-
+    public Double[] getAddress_(){
         //声明AMapLocationClient类对象
         AMapLocationClient mLocationClient = null;
         //初始化定位
-        mLocationClient = new AMapLocationClient(context);
+        mLocationClient = new AMapLocationClient(context.getApplicationContext());
         //设置定位回调监听
-        AMapLocationListener mLocationListener = new AMapLocationListener() {
+        AMapLocationListener mAMapLocationListener = new AMapLocationListener() {
             @Override
             public void onLocationChanged(AMapLocation aMapLocation) {
                 if (aMapLocation != null) {
                     if (aMapLocation.getErrorCode() == 0) {
-                        /*Double longitude = aMapLocation.getLongitude();
+                        Double longitude = aMapLocation.getLongitude();
                         Double latitude = aMapLocation.getLatitude();
-                        str = new String[]{longitude.toString(), latitude.toString()};*/
-                        longitude = aMapLocation.getLongitude();
-                        latitude = aMapLocation.getLatitude();
+                        db = new Double[2];
+                        db[0] = longitude;
+                        db[1] = latitude;
+                        /*longitude = aMapLocation.getLongitude();
+                        latitude = aMapLocation.getLatitude();*/
                     }
-                }else{
-                    //str = new String[]{"1111", "2222"};
                 }
             }
         };
-        Log.i("myTest", "55555555555555555555555555555555555555555555555555");
-        mLocationClient.setLocationListener(mLocationListener);
+
+        mLocationClient.setLocationListener(mAMapLocationListener);
         //启动定位
         mLocationClient.startLocation();
+        return db;
     }
 
     //向api发送请求获取地理信息并返回信息。
     public String getAddress() {
         try {
-            while (longitude.equals(null) || latitude.equals(null)){
-                Thread.sleep(1);
-            }
-            String strUrl = "https://api.go2map.com/engine/api/regeocoder/json?points=" + longitude + "," + latitude + "&type=1";
+            String strUrl = "https://api.go2map.com/engine/api/regeocoder/json?points=" + db[0] + "," + db[1] + "&type=1";
             URL url = new URL(strUrl);
             //创建http连接并开启连接
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -102,8 +95,6 @@ public class GetWeatherInfo {
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         return "false";

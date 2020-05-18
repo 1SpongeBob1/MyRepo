@@ -1,0 +1,2 @@
+rootProject.name='Jishiben'
+include ':app'

@@ -2,9 +2,11 @@ package com.my.weather.app;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -55,19 +57,11 @@ public class MainActivity extends AppCompatActivity {
         et = (EditText)findViewById(R.id.editText);
         button = (Button)findViewById(R.id.button);
 
-        /*Thread t2 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                GetWeatherInfo gwi = new GetWeatherInfo(getApplicationContext());
-                //gwi.getCityInfo();
-                button.setText(gwi.getCityInfo());
-            }
-        });
-        t2.start();*/
+        Context context = getApplicationContext();
+        GetWeatherInfo gwi = new GetWeatherInfo(context);
+        button.setText("city =" + gwi.getCityInfo());
 
-
-
-
+        //t2.start();
         getAddress_();
         t.start();
 
@@ -83,9 +77,6 @@ public class MainActivity extends AppCompatActivity {
                         weather.setText("今日天气情况：" + cond.getString("txt_d"));
                         max.setText("最高温：" + tmp.getString("max"));
                         min.setText("最低温：" + tmp.getString("min"));
-
-
-
                     }
                 } else {
                     max.setText("查询出错" + weatherInfo);
@@ -230,4 +221,13 @@ public class MainActivity extends AppCompatActivity {
         //启动定位
         mLocationClient.startLocation();
     }
+
+    Thread t2 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            Context context = getApplicationContext();
+            GetWeatherInfo gwi = new GetWeatherInfo(context);
+            button.setText(gwi.getCityInfo());
+        }
+    });
 }
