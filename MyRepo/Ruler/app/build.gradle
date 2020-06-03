@@ -5,7 +5,7 @@ Gradle gradle = getGradle()
 String tskReqStr = gradle.getStartParameter().getTaskRequests().toString()
 println("tskReqStr="+tskReqStr)
 if( tskReqStr.contains("Release") ){
-    currentApplicationId="com.stopwatch.miaobiao"
+    currentApplicationId="com.ruler.chizi"
 }
 
 android {
@@ -24,10 +24,10 @@ android {
 
     signingConfigs{
         release{
-            keyAlias 'stopwatch'
-            keyPassword 'stopwatch0525'
-            storePassword 'stopwatch0525'
-            storeFile file('release/stopwatch.keystore')
+            keyAlias 'ruler'
+            keyPassword 'ruler0601'
+            storePassword 'ruler0601'
+            storeFile file('release/ruler.keystore')
         }
     }
 

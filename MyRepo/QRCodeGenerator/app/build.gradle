@@ -5,7 +5,7 @@ Gradle gradle = getGradle()
 String tskReqStr = gradle.getStartParameter().getTaskRequests().toString()
 println("tskReqStr="+tskReqStr)
 if( tskReqStr.contains("Release") ){
-    currentApplicationId="com.stopwatch.miaobiao"
+    currentApplicationId="com.stopwatch"
 }
 
 android {
@@ -24,10 +24,10 @@ android {
 
     signingConfigs{
         release{
-            keyAlias 'stopwatch'
-            keyPassword 'stopwatch0525'
-            storePassword 'stopwatch0525'
-            storeFile file('release/stopwatch.keystore')
+            keyAlias 'tree'
+            keyPassword 'tree0430'
+            storePassword 'tree0430'
+            storeFile file('release/tree.keystore')
         }
     }
 
@@ -49,4 +49,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation 'com.google.zxing:core:3.3.0'
 }
