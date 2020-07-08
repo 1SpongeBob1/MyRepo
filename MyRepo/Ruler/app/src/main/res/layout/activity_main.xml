@@ -8,6 +8,7 @@
 
 
     <RelativeLayout
+        android:id="@+id/rl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -16,6 +17,8 @@
         app:layout_constraintEnd_toEndOf="parent">
 
             <com.nullpack.dev.RulerView
+                android:id="@+id/ruler"
+                android:background="#ACF1EA"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 >
