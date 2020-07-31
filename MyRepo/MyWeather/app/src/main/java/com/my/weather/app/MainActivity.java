@@ -2,232 +2,80 @@ package com.my.weather.app;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
+import com.my.weather.app.databinding.ActivityMainBinding;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.amap.api.location.AMapLocation;
-import com.amap.api.location.AMapLocationClient;
-import com.amap.api.location.AMapLocationListener;
+import org.json.JSONArray;
+import org.json.JSONException;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 
 public class MainActivity extends AppCompatActivity {
-    private TextView weather;
-    private TextView max;
-    private TextView min;
-    private TextView address;
-    private EditText et;
-    private Button button;
-    private String addr;
-    private Handler handler;    //消息处理器，收到请求后修改布局
-    private JSONObject weatherInfo;
-    private JSONObject tmp;     //存储获取的温度信息 "tmp":{"max":"value_1", "min":"value_2"}
-    private JSONObject cond;    //存储获取的天气信息 "cond":{"code_d":"104","code_n":"300","txt_d":"阴","txt_n":"阵雨"}
-    private JSONObject jo;
-    private Double longitude;
-    private Double latitude;
+    private ActivityMainBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        weather = (TextView) findViewById(R.id.weather);
-        max = (TextView) findViewById(R.id.max);
-        min = (TextView) findViewById(R.id.min);
-        address = (TextView) findViewById(R.id.address);
-        et = (EditText)findViewById(R.id.editText);
-        button = (Button)findViewById(R.id.button);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
-        Context context = getApplicationContext();
-        GetWeatherInfo gwi = new GetWeatherInfo(context);
-        button.setText("city =" + gwi.getCityInfo());
+        binding.button.setOnClickListener(v -> {
+            getInfo();
+        });
 
-        //t2.start();
-        getAddress_();
-        t.start();
-
-        handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                //判断返回参数是否正常
-                if (msg.what == 10000) {
-                    if (weatherInfo.getString("msg").equals("查询失败")) {
-                        max.setText("查询失败");
-                    } else {
-                        weather.setText("今日天气情况：" + cond.getString("txt_d"));
-                        max.setText("最高温：" + tmp.getString("max"));
-                        min.setText("最低温：" + tmp.getString("min"));
-                    }
-                } else {
-                    max.setText("查询出错" + weatherInfo);
-                }
-            }
-        };
     }
 
-    //向天气api发送请求
-    public String sendRequest() {
+    //展示天气信息
+    private void showWeather(String weatherInfo){
+        runOnUiThread(()->{
+            binding.weatherContent.setText(weatherInfo);
+        });
+    }
+
+    //发送Http请求获取天气信息
+    private String getInfo(){
+        new Thread(()->{
+            //创建OkHttpClient实例
+            OkHttpClient client = new OkHttpClient();
+
+            //创建request对象并传入参数
+            Request request = new Request.Builder()
+                                    .url(getUrl())
+                                    .build();
+
+            //调用OkHttpClient的newCall()方法创建一个Call对象，并调用它的execute方法发送请求，接受response对象数据。
+            try {
+                Response response = client.newCall(request).execute();
+                //处理response数据
+                showWeather(parseJson(response));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+        return null;
+    }
+
+    private String getUrl(){
+        String city = null;
+        //
+        return "https://way.jd.com/he/freeweather?city=" + city + "&appkey=d1f0e670fecaadeef96e3cdcfaeb9fb6";
+    }
+
+    private String parseJson(Response response)throws IOException {
+        String responseData = null;
+            responseData = response.body().string();
         try {
-            String strURL = "https://way.jd.com/he/freeweather?city=" + parseAddr(getAddress()) + "&appkey=d1f0e670fecaadeef96e3cdcfaeb9fb6";
-            URL url = new URL(strURL);
-            //创建http连接并开启连接
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setDoInput(true); //设置允许输入输出
-            connection.setDoOutput(true);
-            BufferedReader bf = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = bf.readLine()) != null) {
-                sb.append(line);
-            }
-            bf.close();
-            String responseInfo = sb.toString();    //收集响应信息并返回
-            return responseInfo;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+            JSONArray jsonArray = new JSONArray(responseData);
+        } catch (JSONException e) {
             e.printStackTrace();
         }
-        return "false";
+
+
+        return "";
     }
-
-    //向api发送请求获取地理信息并返回信息。
-    public String getAddress() {
-        try {
-            String strUrl = "https://api.go2map.com/engine/api/regeocoder/json?points=" + longitude + "," + latitude + "&type=1";
-            URL url = new URL(strUrl);
-            //创建http连接并开启连接
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setDoInput(true); //设置允许输入输出
-            connection.setDoOutput(true);
-            URLDecoder.decode(connection.getInputStream().toString(), "UTF-8");
-            BufferedReader bf = new BufferedReader(new InputStreamReader(connection.getInputStream(), "GBK"));
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = bf.readLine()) != null) {
-                sb.append(line);
-            }
-            bf.close();
-            String addrInfo = sb.toString();    //收集响应信息并返回
-            return addrInfo;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return "false";
-    }
-
-    //解析获取本地城市信息
-    public String parseAddr(String addrInfo) {
-        jo = JSON.parseObject(addrInfo);
-        JSONObject response = JSON.parseObject(jo.getString("response"));
-        JSONArray data = response.getJSONArray("data");
-        JSONObject jo_2 = JSON.parseObject(data.get(0).toString());
-        String city = jo_2.getString("city");
-        addr = city;
-        return city;
-    }
-
-
-    //解析天气的json信息
-    public String JSONParser(String addrInfo) {
-        //FastJson将json对象转为java对象
-        weatherInfo = JSON.parseObject(addrInfo);
-        JSONObject result = JSON.parseObject(weatherInfo.getString("result"));
-        JSONArray weathers = result.getJSONArray("HeWeather5");
-        JSONArray daily_forecast = JSON.parseObject(weathers.get(0).toString()).getJSONArray("daily_forecast");
-        for (Object object : daily_forecast) {
-            JSONObject json = (JSONObject) object;
-            if (json.getString("date") != null && json.getString("date").equals(getDate())) {
-                tmp = json.getJSONObject("tmp");
-                cond = json.getJSONObject("cond");
-            }
-        }
-        //向消息处理器发送消息
-        int i = Integer.parseInt(weatherInfo.getString("code"));
-        handler.sendEmptyMessage(i);
-        return "true";
-    }
-
-    //获取当前日期
-    public String getDate() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        return sdf.format(new Date());
-    }
-
-    //开启一个线程来发送请求信息
-    Thread t = new Thread(new Runnable() {
-        @Override
-        public void run() {
-
-            while(longitude == null || latitude == null){
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            JSONParser(sendRequest());
-
-
-        }
-    });
-
-    //高德地图获取地址信息
-    public void getAddress_(){
-        //声明AMapLocationClient类对象
-        AMapLocationClient mLocationClient = null;
-        //初始化定位
-        mLocationClient = new AMapLocationClient(getApplicationContext());
-        //设置定位回调监听
-        AMapLocationListener mLocationListener = new AMapLocationListener() {
-            @Override
-            public void onLocationChanged(AMapLocation aMapLocation) {
-                if (aMapLocation != null) {
-                    if (aMapLocation.getErrorCode() == 0) {
-                        longitude = aMapLocation.getLongitude();
-                        latitude = aMapLocation.getLatitude();
-                        address.setText("目前所在地：" + aMapLocation.getAddress());
-                    }
-                }else{
-                    Toast.makeText(MainActivity.this, "something went wrong", Toast.LENGTH_SHORT).show();
-                }
-            }
-        };
-        mLocationClient.setLocationListener(mLocationListener);
-        //启动定位
-        mLocationClient.startLocation();
-    }
-
-    Thread t2 = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            Context context = getApplicationContext();
-            GetWeatherInfo gwi = new GetWeatherInfo(context);
-            button.setText(gwi.getCityInfo());
-        }
-    });
 }

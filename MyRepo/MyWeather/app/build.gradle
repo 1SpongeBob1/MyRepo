@@ -21,6 +21,17 @@ android {
         }
     }
 
+    //支持lambda表达式
+    compileOptions{
+        encoding 'UTF-8'
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    viewBinding{
+        enabled = true
+    }
+
 }
 
 dependencies {
@@ -35,4 +46,5 @@ dependencies {
     implementation 'com.alibaba:fastjson:1.2.68'
     implementation 'com.amap.api:location:latest.integration'
 
+    implementation 'com.squareup.okhttp3:okhttp:4.1.0'
 }
