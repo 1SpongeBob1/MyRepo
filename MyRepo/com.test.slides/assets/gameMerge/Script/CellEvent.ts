@@ -24,6 +24,8 @@ export default class CellEvent extends cc.Component{
     currentX : number = null;
     // currentY : number = null;
 
+    pos : Vec2 = null;
+
     get X(): number {
         return this._X;
     }
@@ -53,11 +55,12 @@ export default class CellEvent extends cc.Component{
         }
         this.startX = this.currentNode.position.x;
         this.startY = this.currentNode.position.y;
+        // 找出父节点在世界坐标系的x位置，方便算出子节点坐标偏差。
+        this.pos = this.currentNode.parent.convertToWorldSpaceAR(this.currentNode.parent.position);
         if (CellCtrl.getInstance().gameNodes[this._Y][this._Y].cellType != CellType.pp){
             return;
         }
         this.currentNode.on(cc.Node.EventType.TOUCH_MOVE, (event)=>{
-            console.log("CellEvent : currentPosition : " + this._X + " " + this._Y);
             this.move(event);
         }, this);
 
@@ -73,7 +76,8 @@ export default class CellEvent extends cc.Component{
     move(event){
         let maxLimit = CellCtrl.getInstance().getMaxX(this._X, this._Y, this.startX);
         let minLimit = CellCtrl.getInstance().getMinX(this._X, this._Y, this.startX);
-        this.currentX = event.getLocation().x - 360;
+
+        this.currentX = event.getLocation().x - this.pos.x;
         if (this.currentX <= minLimit){
             this.currentX = minLimit;
         }
@@ -117,7 +121,6 @@ export default class CellEvent extends cc.Component{
     }
 
     down(){
-        console.log("CellEvent : " + this._X + "; " + this._Y + "; " + this.startX + "; " + this.startY);
         if (this._Y == 0){
             CellCtrl.getInstance().moveEnd(this._Y);
             return;
