@@ -1,8 +1,6 @@
 import Vec2 = cc.Vec2;
 import {CellCtrl} from "./CellCtrl";
 import {CellType} from "./CellItemInfo";
-import GameSlides from "./GameSlides";
-import callFunc = cc.callFunc;
 
 const {ccclass, property} = cc._decorator;
 
@@ -50,69 +48,43 @@ export default class CellEvent extends cc.Component{
 
     protected start() {
         if (this.guide && (this._X != 4 || this._Y != 4)){
+        // if (this.guide){
             this.guide.active = false;
         }
         this.startX = this.currentNode.position.x;
         this.startY = this.currentNode.position.y;
-        this.currentX = this.startX;
-        if (CellCtrl.getInstance().gameNodes[this._Y][this._X].cellType != CellType.pp){
+        if (CellCtrl.getInstance().gameNodes[this._Y][this._Y].cellType != CellType.pp){
             return;
         }
-
         this.currentNode.on(cc.Node.EventType.TOUCH_MOVE, (event)=>{
-                this.move(event);
-
+            console.log("CellEvent : currentPosition : " + this._X + " " + this._Y);
+            this.move(event);
         }, this);
 
         this.currentNode.on(cc.Node.EventType.TOUCH_END, ()=>{
-                this.moveEnd(this.currentX);
-
+            this.moveEnd(this.currentX);
         }, this);
 
         this.currentNode.on(cc.Node.EventType.TOUCH_CANCEL, ()=>{
-                this.moveEnd(this.currentX);
+            this.moveEnd(this.currentX);
         }, this);
     }
 
-    limit : number = null;
     move(event){
-        if (event.getLocation().x - 360 <= this.startX){
-            return;
-        }
+        let maxLimit = CellCtrl.getInstance().getMaxX(this._X, this._Y, this.startX);
+        let minLimit = CellCtrl.getInstance().getMinX(this._X, this._Y, this.startX);
         this.currentX = event.getLocation().x - 360;
-        this.limit = CellCtrl.getInstance().getMaxX(this._X, this._Y, this.startX);
-
-        switch (CellCtrl.steps) {
-            case 0:{
-                this.limit = -259 + 74 * 5;
-                break;
-            }
-            case 1:{
-                this.limit = -259 + 74 * 6;
-                break;
-            }
-            case 2:{
-                this.limit = -259 + 74 * 4;
-                break;
-            }
-            case 3:{
-                this.limit = -259 + 74 * 2;
-                break;
+        if (this.currentX <= minLimit){
+            this.currentX = minLimit;
+        }
+        if (this.currentX >= this.startX){
+            if (this.currentX > maxLimit){
+                this.currentX = maxLimit;
             }
         }
-
-        if (this.currentX > this.startX){
-            if (this.currentX > this.limit){
-                this.currentX = this.limit;
-            }
-            this.currentNode.position = new Vec2(this.currentX, this.startY);
-            this.currentX = this.limit;
-            this.node.runAction(cc.sequence(cc.moveTo(CellCtrl.getInstance().getDuration(this.limit - this.startX), this.limit, this.startY), callFunc(()=>{
-                this.moveEnd(this.limit);
-            })));
-            if (this.guide && this.guide.active == true){
-                this.guide.active = false;
-            }
+        this.currentNode.position = new Vec2(this.currentX, this.startY);
+        if (this.guide && this.guide.active == true){
+            this.guide.active = false;
         }
     }
 
@@ -133,6 +105,9 @@ export default class CellEvent extends cc.Component{
                     this.currentNode.position = new Vec2(x-74, this.startY);
                     this.startX = x-74;
                 }
+                if (endX == this._X){
+                    return;
+                }
                 CellCtrl.getInstance().exchange(this._X, this._Y, endX, this._Y);
                 this._X = endX;
                 break;
@@ -144,6 +119,7 @@ export default class CellEvent extends cc.Component{
     down(){
         console.log("CellEvent : " + this._X + "; " + this._Y + "; " + this.startX + "; " + this.startY);
         if (this._Y == 0){
+            CellCtrl.getInstance().moveEnd(this._Y);
             return;
         }
         for(let i = this._Y - 1; i >= 0; i --){
@@ -155,6 +131,7 @@ export default class CellEvent extends cc.Component{
                         CellCtrl.getInstance().exchange(this._X, this._Y, this._X, i + 1);
                         this._Y = i + 1;
                         this.startY = this.startY - 74*(this._Y - i - 1);
+                        CellCtrl.getInstance().moveEnd(this._Y);
                     }, this)));
                 break;
             }else {
@@ -165,11 +142,11 @@ export default class CellEvent extends cc.Component{
                             CellCtrl.getInstance().exchange(this._X, this._Y, this._X, 0);
                             this._Y = 0;
                             this.startY = this.startY - 74*this._Y;
+                            CellCtrl.getInstance().moveEnd(this._Y);
                         }, this)));
                 }
             }
         }
-        console.log("CellEvent : " + this._X + "; " + this._Y + "; " + this.startX + "; " + this.startY);
+        console.log("CellEvent : currentPosition-end : " + this._X + "; " + this._Y + "; " + this.startX + "; " + this.startY);
     }
-
 }

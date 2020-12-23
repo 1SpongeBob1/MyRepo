@@ -36,11 +36,6 @@ export default class CellItemInfo extends cc.Component {
                     cc.callFunc(()=>{
                         this.currentPrefab.currentNode.destroy();
                         this.cellType = CellType.blank;
-                        // if (this.currentPrefab.X == 0){
-                        //     this.scheduleOnce(this.func, 1);
-                        // }else {
-                        //     GameSlides.shakeCount ++;
-                        // }
                         FMgr.Audio.PlayEffect(AudioConst.ADD);
                     })
                 ));
@@ -49,7 +44,7 @@ export default class CellItemInfo extends cc.Component {
     }
 
     func(){
-        GameSlides.shakeCount ++;
+        CellCtrl.shakeCount ++;
     }
 }
 

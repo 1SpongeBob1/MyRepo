@@ -70,8 +70,11 @@ export default class GameSlides extends cc.Component {
     @property(cc.Prefab)
     PpCellPrefab : cc.Prefab = null;
 
+    public static INSTANCE : GameSlides = null;
+
 
     onLoad () {
+        GameSlides.INSTANCE = this;
         FMgr.Audio.PlayEffect(AudioConst.BGM);
         for (let j = 0; j < 10; j ++){
             for (let i = 0; i < 8; i ++){
@@ -116,6 +119,7 @@ export default class GameSlides extends cc.Component {
      * @param j 所在行数
      * @param i 所在列数
      * @param cellType  要设置在当前坐标的方块类型
+     * @param isUpdate
      */
     private setCells(j : number, i : number, cellType : CellType, isUpdate = false){
         // 如果当前数组为空则插入方块
@@ -209,76 +213,40 @@ export default class GameSlides extends cc.Component {
 
     }
 
-    static shakeCount = 0;
-    static test = false;
-
+    static destroyedLine : number = null;
+    static isGenerate = false;
+    static isShowPpUI = false;
     update (dt) {
-        let completedRow = null;
-        for (let j = 0; j < 10; j ++){
-            if(CellCtrl.getInstance().gameNodes[j] && this.isComplete(j)){
-                completedRow = j;
-                // 销毁已完成的行的节点
-                for (let i = 0; i < 8; i ++){
-                    if (CellCtrl.getInstance().gameNodes[j][i] && CellCtrl.getInstance().gameNodes[j][i].currentPrefab){
-                        CellCtrl.getInstance().gameNodes[j][i].shake();
-                        // let node = CellCtrl.getInstance().gameNodes[j][i].currentPrefab.currentNode;
-                        // node.runAction(
-                        //     cc.sequence(
-                        //         cc.moveTo( 0.1, node.position.x - 5, 0),
-                        //         cc.moveTo(0.1, node.position.x + 10, 0),
-                        //         cc.moveTo( 0.1, node.position.x - 10, 0),
-                        //         cc.moveTo(0.1, node.position.x + 10, 0),
-                        //         cc.moveTo( 0.1, node.position.x - 10, 0),
-                        //         cc.moveTo(0.1, node.position.x + 10, 0),
-                        //         cc.callFunc(()=>{
-                        //
-                        //         })
-                        //     ));
-
-                        // CellCtrl.getInstance().gameNodes[j][i].cellType = CellType.blank;
-                        // CellCtrl.getInstance().gameNodes[j][i].currentPrefab.currentNode.destroy();
-                        // CellCtrl.getInstance().gameNodes[j][i] = null;
-                    }
-                }
-            }
+        if (GameSlides.destroyedLine){
+            let temp = GameSlides.destroyedLine;
+            GameSlides.destroyedLine = null;
+            CellCtrl.shakeCount = 0;
+            CellCtrl.getInstance().rise(temp - 1);
         }
-        if (completedRow && GameSlides.shakeCount >= 8){
-            GameSlides.test = false;
+        if (GameSlides.isGenerate){
+            GameSlides.isGenerate = false;
+            GameSlides.INSTANCE.generateNenLine();
+        }
+        if (GameSlides.isShowPpUI){
+            GameSlides.isShowPpUI = false;
             PGlobal.Me.payPalUI.ShowGetUI();
-            let temp = completedRow - 1;
-            completedRow = null;
-            for (temp; temp >= 0; temp --){
-                for (let i = 0; i < 8; i ++){
-                    let info = CellCtrl.getInstance().gameNodes[temp][i];
-                    if (info && info.currentPrefab){
-                        info.currentPrefab.startY += 74;
-                        info.currentPrefab.currentNode.runAction(cc.moveTo(0.5, info.currentPrefab.currentNode.position.x, info.currentPrefab.currentNode.position.y + 74));
-                    }
-                    CellCtrl.getInstance().gameNodes[temp + 1][i] = info;
-                }
-
-            }
-            for (let i = 0; i < 8; i ++){
-                this.setCells(0, i, this.getCellType(CellCtrl.getInstance().reserveCells[CellCtrl.steps][i]), true);
-            }
-            CellCtrl.steps ++;
-            if (CellCtrl.steps < 4){
-                CellCtrl.getInstance().gameNodes[4][4 - CellCtrl.steps].currentPrefab.showGuide();
-            }
-            
-
         }
-
     }
 
-    // 当前行是否可以消除
-    isComplete(j : number) : boolean{
+
+    /**
+     * 生成新的一行
+     */
+    public generateNenLine(){
         for (let i = 0; i < 8; i ++){
-            if (CellCtrl.getInstance().gameNodes[j][i] && ( CellCtrl.getInstance().gameNodes[j][i].cellType == CellType.blank ) ){
-                return false;
+            if (CellCtrl.steps < 4){
+                this.setCells(0, i, this.getCellType(CellCtrl.getInstance().reserveCells[CellCtrl.steps][i]), true);
             }
         }
-        return true;
+        CellCtrl.steps ++;
+
+        CellCtrl.getInstance().destroyLine(0);
+        CellCtrl.getInstance().fall(1);
     }
 
     // 返回随机色彩的方块预制
