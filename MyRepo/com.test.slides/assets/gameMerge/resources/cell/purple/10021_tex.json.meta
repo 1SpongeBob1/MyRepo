@@ -1,0 +1,7 @@
+{
+  "ver": "1.0.0",
+  "uuid": "d74fbe61-707f-47ed-a3e8-15af983c277d",
+  "atlasJson": "{\"SubTexture\":[{\"frameHeight\":69,\"y\":1,\"frameX\":-1,\"width\":67,\"frameY\":-1,\"height\":67,\"name\":\"10021\",\"frameWidth\":69,\"x\":1},{\"width\":15,\"y\":70,\"height\":15,\"name\":\"10021_eyes1\",\"x\":1}],\"width\":128,\"height\":128,\"name\":\"10021\",\"imagePath\":\"10021_tex.png\"}",
+  "texture": "fe64672a-1b65-4ed8-a091-a2b1645be51d",
+  "subMetas": {}
+}

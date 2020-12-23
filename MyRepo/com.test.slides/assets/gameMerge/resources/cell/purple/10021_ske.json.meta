@@ -1,0 +1,6 @@
+{
+  "ver": "1.0.0",
+  "uuid": "2fa476a8-f01b-4c5d-8faa-6ff083abbade",
+  "dragonBonesJson": "{\"frameRate\":24,\"name\":\"10021\",\"version\":\"5.5\",\"compatibleVersion\":\"5.5\",\"armature\":[{\"type\":\"Armature\",\"frameRate\":24,\"name\":\"10021\",\"aabb\":{\"x\":-34.5,\"y\":-34.5,\"width\":69,\"height\":69},\"bone\":[{\"name\":\"root\"},{\"length\":15,\"name\":\"10021_eyes1\",\"parent\":\"root\",\"transform\":{\"x\":-7.55,\"y\":-8.8,\"skX\":0.7489,\"skY\":0.7489}}],\"slot\":[{\"name\":\"10021\",\"parent\":\"root\"},{\"name\":\"10021_eyes1\",\"parent\":\"10021_eyes1\"}],\"skin\":[{\"slot\":[{\"name\":\"10021_eyes1\",\"display\":[{\"name\":\"10021_eyes1\",\"transform\":{\"x\":8.05,\"y\":-0.52,\"skX\":-0.75,\"skY\":-0.75}}]},{\"name\":\"10021\",\"display\":[{\"name\":\"10021\"}]}]}],\"animation\":[{\"duration\":120,\"playTimes\":0,\"name\":\"10025\",\"bone\":[{\"name\":\"10021_eyes1\",\"translateFrame\":[{\"duration\":2,\"tweenEasing\":0},{\"duration\":27,\"tweenEasing\":0,\"y\":-5.72},{\"duration\":2,\"tweenEasing\":0,\"y\":-5.72},{\"duration\":37,\"tweenEasing\":0},{\"duration\":2,\"tweenEasing\":0},{\"duration\":32,\"tweenEasing\":0,\"y\":5.58},{\"duration\":2,\"tweenEasing\":0,\"y\":5.58},{\"duration\":16}]}]}],\"defaultActions\":[{\"gotoAndPlay\":\"10025\"}]}]}",
+  "subMetas": {}
+}
